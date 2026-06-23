@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+*.tsbuildinfo
+
+# Working / temp dirs
+tmp/
+
+# Raw Microsoft icon sources (NOT redistributed in raw form).
+# Place provided zips or extracted SVGs here; they are ignored by git.
+downloads/
+!downloads/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log

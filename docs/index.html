@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Microsoft Icons → draw.io · Library URL builder</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        max-width: 760px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5;
+      }
+      h1 { font-size: 1.4rem; }
+      label { display: block; margin: 1rem 0 0.25rem; font-weight: 600; }
+      input[type="text"] { width: 100%; padding: 0.5rem; font-size: 1rem; box-sizing: border-box; }
+      fieldset { margin-top: 1rem; border: 1px solid #8884; border-radius: 8px; }
+      .fam { display: inline-flex; align-items: center; gap: 0.35rem; margin: 0.25rem 0.75rem 0.25rem 0; }
+      .out { margin-top: 1.25rem; }
+      textarea { width: 100%; height: 5rem; padding: 0.5rem; font-family: ui-monospace, monospace; box-sizing: border-box; }
+      a.btn, button {
+        display: inline-block; margin-top: 0.5rem; padding: 0.5rem 0.9rem;
+        border: 1px solid #8886; border-radius: 6px; background: #0078d4; color: #fff;
+        text-decoration: none; cursor: pointer; font-size: 0.95rem;
+      }
+      button.secondary { background: transparent; color: inherit; }
+      small { color: #8a8a8a; }
+    </style>
+  </head>
+  <body>
+    <h1>draw.io custom-library URL builder</h1>
+    <p>
+      Build a <code>?clibs=</code> link that opens
+      <a href="https://app.diagrams.net/" target="_blank" rel="noopener">diagrams.net</a>
+      with the selected Microsoft icon libraries pre-loaded.
+    </p>
+
+    <label for="base">Raw base URL to your <code>libraries/</code> folder</label>
+    <input
+      id="base"
+      type="text"
+      value="https://raw.githubusercontent.com/chmald/msft-icons/main/libraries"
+    />
+    <small>Edit if you fork or use a different branch.</small>
+
+    <fieldset>
+      <legend>Families</legend>
+      <div id="families"></div>
+    </fieldset>
+
+    <div class="out">
+      <label for="result">Generated URL</label>
+      <textarea id="result" readonly></textarea>
+      <div>
+        <a id="open" class="btn" href="#" target="_blank" rel="noopener">Open in draw.io</a>
+        <button id="copy" class="secondary" type="button">Copy URL</button>
+      </div>
+    </div>
+
+    <script>
+      const FAMILIES = [
+        ['azure', 'Azure'],
+        ['fabric', 'Microsoft Fabric'],
+        ['dynamics365', 'Dynamics 365'],
+        ['power-platform', 'Power Platform'],
+        ['microsoft-365', 'Microsoft 365'],
+        ['entra-security', 'Entra & Security'],
+      ];
+      const DRAWIO = 'https://app.diagrams.net/?clibs=';
+
+      const famWrap = document.getElementById('families');
+      for (const [id, name] of FAMILIES) {
+        const label = document.createElement('label');
+        label.className = 'fam';
+        label.innerHTML =
+          `<input type="checkbox" value="${id}"${id === 'azure' ? ' checked' : ''}/> ${name}`;
+        famWrap.appendChild(label);
+      }
+
+      const baseEl = document.getElementById('base');
+      const resultEl = document.getElementById('result');
+      const openEl = document.getElementById('open');
+
+      function build() {
+        const base = baseEl.value.replace(/\/+$/, '');
+        const selected = [...document.querySelectorAll('#families input:checked')].map((c) => c.value);
+        if (selected.length === 0) {
+          resultEl.value = '';
+          openEl.removeAttribute('href');
+          return;
+        }
+        const clibs = selected.map((id) => 'U' + base + '/' + id + '.xml').join(';');
+        const url = DRAWIO + encodeURIComponent(clibs);
+        resultEl.value = url;
+        openEl.href = url;
+      }
+
+      document.addEventListener('input', build);
+      document.getElementById('copy').addEventListener('click', async () => {
+        if (resultEl.value) await navigator.clipboard.writeText(resultEl.value);
+      });
+      build();
+    </script>
+  </body>
+</html>

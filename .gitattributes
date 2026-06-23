@@ -1,0 +1,9 @@
+# Normalize line endings to LF for text files in the repo.
+* text=auto eol=lf
+
+# Treat generated/data artifacts as text but keep LF.
+*.xml  text eol=lf
+*.js   text eol=lf
+*.ts   text eol=lf
+*.json text eol=lf
+*.md   text eol=lf

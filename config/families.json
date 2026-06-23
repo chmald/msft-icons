@@ -1,0 +1,91 @@
+{
+  "iconSizePx": 48,
+  "families": [
+    {
+      "id": "entra-security",
+      "name": "Entra & Security",
+      "description": "Microsoft Entra and security icons: the standalone Entra colour set, plus the identity/security categories carved out of the Azure set.",
+      "match": [
+        { "sources": ["entra"] },
+        {
+          "sources": ["azure", "azure_public_service_icons"],
+          "pathIncludes": [
+            "identity",
+            "active directory",
+            "active-directory",
+            "conditional",
+            "defender",
+            "sentinel",
+            "security"
+          ],
+          "pathExcludes": [
+            "network-security-group",
+            "network security group",
+            "application security group"
+          ]
+        }
+      ],
+      "stripTokens": [],
+      "dropTokens": ["icon", "icons", "svg", "bw", "color", "colour"],
+      "collapseVariants": true,
+      "preferTokens": ["color icons", "colour icons", "color", "entra"]
+    },
+    {
+      "id": "azure",
+      "name": "Azure",
+      "description": "Microsoft Azure architecture / service icons (includes AI Foundry assets bundled in the Azure set).",
+      "match": { "sources": ["azure", "azure_public_service_icons"] },
+      "stripTokens": [],
+      "dropTokens": []
+    },
+    {
+      "id": "fabric",
+      "name": "Microsoft Fabric",
+      "description": "Microsoft Fabric product, workload, and item icons (one entry per icon, size/style variants collapsed).",
+      "match": { "sources": ["fabric"] },
+      "stripTokens": [],
+      "dropTokens": [
+        "12", "16", "20", "24", "28", "32", "40", "48", "64",
+        "filled", "regular", "color", "item", "non", "filed"
+      ],
+      "collapseVariants": true,
+      "preferTokens": [
+        "_color", "_item", "_48_", "_40_", "_32_", "_28_", "_24_", "_20_", "_16_", "_12_",
+        "filled", "regular"
+      ]
+    },
+    {
+      "id": "dynamics365",
+      "name": "Dynamics 365",
+      "description": "Microsoft Dynamics 365 app icons.",
+      "match": {
+        "sources": ["dynamics", "dynamics365", "d365"],
+        "pathExcludes": ["power platform", "power-platform", "power_platform"]
+      },
+      "stripTokens": ["dynamics-365", "dynamics365", "dynamics"],
+      "dropTokens": ["scalable"],
+      "collapseVariants": true
+    },
+    {
+      "id": "power-platform",
+      "name": "Power Platform",
+      "description": "Power BI, Power Apps, Power Automate, Power Pages, Copilot Studio.",
+      "match": { "sources": ["power", "power-platform", "power_platform", "powerplatform"] },
+      "stripTokens": [],
+      "dropTokens": ["scalable"],
+      "collapseVariants": true
+    },
+    {
+      "id": "microsoft-365",
+      "name": "Microsoft 365",
+      "description": "Microsoft 365 / Office content icons (one entry per icon; the Microsoft Blue / dark-blue theme is preferred).",
+      "match": {
+        "sources": ["microsoft-365", "microsoft365", "m365", "office", "office365"]
+      },
+      "stripTokens": [],
+      "dropTokens": [],
+      "collapseVariants": true,
+      "preferTokens": ["48x48 dark blue", "microsoft blue", "dark blue", "svg icon"]
+    }
+  ]
+}
