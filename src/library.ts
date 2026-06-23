@@ -93,10 +93,19 @@ export function buildLibraryXml(entries: LibraryEntry[]): string {
   return `<mxlibrary>${JSON.stringify(entries)}</mxlibrary>`;
 }
 
-/** Write a family's library to `<outDir>/<familyId>.xml`. Returns the file path. */
-export function writeLibrary(outDir: string, familyId: string, entries: LibraryEntry[]): string {
+/** Make a display name safe as a file name (filesystem- and URL-friendly). */
+function safeFileName(name: string): string {
+  return name
+    .replace(/&/g, 'and')
+    .replace(/[<>:"/\\|?*]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Write a family's library to `<outDir>/<name>.xml`. Returns the file path. */
+export function writeLibrary(outDir: string, name: string, entries: LibraryEntry[]): string {
   ensureDir(outDir);
-  const file = path.join(outDir, `${familyId}.xml`);
+  const file = path.join(outDir, `${safeFileName(name)}.xml`);
   fs.writeFileSync(file, buildLibraryXml(entries), 'utf8');
   return file;
 }

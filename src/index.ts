@@ -149,7 +149,7 @@ function runBuild(rawArgs: string[]): number {
     if (opts.report) {
       info(`${family.name.padEnd(20)} ${String(entries.length).padStart(6)}  (report only)`);
     } else {
-      const file = writeLibrary(opts.out, family.id, entries);
+      const file = writeLibrary(opts.out, family.name, entries);
       info(`${family.name.padEnd(20)} ${String(entries.length).padStart(6)}  ${path.relative(process.cwd(), file)}`);
     }
   }

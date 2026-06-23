@@ -5,15 +5,16 @@ libraries from the **official Microsoft product SVG icon sets** — Azure, Micro
 Fabric, Dynamics 365, Power Platform, Microsoft 365, and Entra/Security.
 
 The generator turns folders/zips of SVGs into **one `.xml` library per product
-family** that you can import locally or load by URL.
+family** that you can import locally or load by URL. Each file is named after the
+product family, which is the name draw.io shows in the **Shapes** panel:
 
 ```
-Azure                  azure.xml
-Microsoft Fabric       fabric.xml
-Dynamics 365           dynamics365.xml
-Power Platform         power-platform.xml
-Microsoft 365          microsoft-365.xml
-Entra & Security       entra-security.xml
+Azure.xml
+Microsoft Fabric.xml
+Dynamics 365.xml
+Power Platform.xml
+Microsoft 365.xml
+Entra and Security.xml
 ```
 
 > ℹ️ The raw Microsoft SVGs are **not** committed to this repo (see
@@ -80,24 +81,26 @@ basename or top-level folder name) and optional path filters — see
 
 1. Open <https://app.diagrams.net/> (or draw.io Desktop).
 2. **File → Open Library from → Device…**
-3. Select e.g. `libraries/azure.xml`. The shapes appear in the left **Shapes** panel.
+3. Select e.g. `libraries/Azure.xml`. The shapes appear in the left **Shapes**
+   panel under a section named after the file (e.g. "Azure").
 
 ### B) Load by URL (`?clibs=`) — public web app
 
 Load libraries straight from the raw GitHub URL. Prefix each URL with `U` (for
-*URL*); separate multiple libraries with `;`:
+*URL*); separate multiple libraries with `;`. File names contain spaces, so
+URL-encode them (` ` → `%20`):
 
 ```
-https://app.diagrams.net/?clibs=Uhttps://raw.githubusercontent.com/chmald/msft-icons/main/libraries/azure.xml
+https://app.diagrams.net/?clibs=Uhttps://raw.githubusercontent.com/chmald/msft-icons/main/libraries/Azure.xml
 ```
 
 Multiple families at once:
 
 ```
-https://app.diagrams.net/?clibs=Uhttps://raw.githubusercontent.com/chmald/msft-icons/main/libraries/azure.xml;Uhttps://raw.githubusercontent.com/chmald/msft-icons/main/libraries/fabric.xml
+https://app.diagrams.net/?clibs=Uhttps://raw.githubusercontent.com/chmald/msft-icons/main/libraries/Azure.xml;Uhttps://raw.githubusercontent.com/chmald/msft-icons/main/libraries/Microsoft%20Fabric.xml
 ```
 
-A small **[URL builder](docs/index.html)** assembles these links for you.
+A small **[URL builder](docs/index.html)** assembles (and encodes) these links for you.
 
 ### C) draw.io plugin — load ALL families at once (self-hosted draw.io)
 
@@ -132,7 +135,7 @@ Families and classification rules live in [`config/families.json`](config/famili
   "iconSizePx": 48,             // longer edge scaled to this; aspect preserved
   "families": [
     {
-      "id": "fabric",          // -> libraries/fabric.xml
+      "id": "fabric",          // family id (internal); file -> "Microsoft Fabric.xml"
       "name": "Microsoft Fabric",
 
       // `match` is one rule, or a list of rules OR'd together. A rule matches
@@ -160,7 +163,7 @@ Families and classification rules live in [`config/families.json`](config/famili
   were **unclassified** — then tune the rules.
 
 > **Microsoft Foundry / AI Foundry** icons ship inside the **Azure** architecture set
-> (AI category), so they land in `azure.xml` — there is no separate Foundry library.
+> (AI category), so they land in `Azure.xml` — there is no separate Foundry library.
 
 ### Titles
 

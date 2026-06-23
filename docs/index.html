@@ -57,22 +57,23 @@
     </div>
 
     <script>
+      // [libraryFileBaseName, displayLabel]
       const FAMILIES = [
-        ['azure', 'Azure'],
-        ['fabric', 'Microsoft Fabric'],
-        ['dynamics365', 'Dynamics 365'],
-        ['power-platform', 'Power Platform'],
-        ['microsoft-365', 'Microsoft 365'],
-        ['entra-security', 'Entra & Security'],
+        ['Azure', 'Azure'],
+        ['Microsoft Fabric', 'Microsoft Fabric'],
+        ['Dynamics 365', 'Dynamics 365'],
+        ['Power Platform', 'Power Platform'],
+        ['Microsoft 365', 'Microsoft 365'],
+        ['Entra and Security', 'Entra & Security'],
       ];
       const DRAWIO = 'https://app.diagrams.net/?clibs=';
 
       const famWrap = document.getElementById('families');
-      for (const [id, name] of FAMILIES) {
+      for (const [file, name] of FAMILIES) {
         const label = document.createElement('label');
         label.className = 'fam';
         label.innerHTML =
-          `<input type="checkbox" value="${id}"${id === 'azure' ? ' checked' : ''}/> ${name}`;
+          `<input type="checkbox" value="${file}"${file === 'Azure' ? ' checked' : ''}/> ${name}`;
         famWrap.appendChild(label);
       }
 
@@ -88,8 +89,10 @@
           openEl.removeAttribute('href');
           return;
         }
-        const clibs = selected.map((id) => 'U' + base + '/' + id + '.xml').join(';');
-        const url = DRAWIO + encodeURIComponent(clibs);
+        const clibs = selected
+          .map((file) => 'U' + base + '/' + encodeURIComponent(file + '.xml'))
+          .join(';');
+        const url = DRAWIO + clibs;
         resultEl.value = url;
         openEl.href = url;
       }

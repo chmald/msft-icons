@@ -9,6 +9,7 @@ import type { LibraryEntry } from './types.js';
 interface PluginFamily {
   id: string;
   title: string;
+  order: number;
   entries: Pick<LibraryEntry, 'data' | 'w' | 'h' | 'title'>[];
 }
 
@@ -30,7 +31,13 @@ function main(): void {
   const outFile = path.resolve(process.cwd(), args[1] ?? path.join('plugin', 'msft-icons.js'));
 
   const config = loadConfig(DEFAULT_CONFIG_PATH);
-  const nameById = new Map(config.families.map((f) => [f.id, f.name]));
+  // Library files are now named after the family display name, but also map the
+  // family id (legacy) so the plugin works regardless of the file-naming scheme.
+  const meta = new Map<string, { name: string; order: number }>();
+  config.families.forEach((f, i) => {
+    meta.set(f.name, { name: f.name, order: i });
+    meta.set(f.id, { name: f.name, order: i });
+  });
 
   const files = walkFiles(libDir, '.xml');
   if (files.length === 0) {
@@ -39,19 +46,21 @@ function main(): void {
     return;
   }
 
-  // Preserve the family order from config; append any extras alphabetically.
-  const order = new Map(config.families.map((f, i) => [f.id, i]));
   const families: PluginFamily[] = files
     .map((file) => {
-      const id = path.basename(file, '.xml');
+      const base = path.basename(file, '.xml');
+      const m = meta.get(base);
+      const id = base.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const entries = parseLibrary(file).map((e) => ({ data: e.data, w: e.w, h: e.h, title: e.title }));
-      return { id, title: nameById.get(id) ?? id, entries };
+      return { id, title: m?.name ?? base, order: m?.order ?? 999, entries };
     })
     .filter((fam) => fam.entries.length > 0)
-    .sort((a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999) || a.id.localeCompare(b.id));
+    .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title));
 
   const total = families.reduce((n, f) => n + f.entries.length, 0);
-  const payload = JSON.stringify({ families });
+  const payload = JSON.stringify({
+    families: families.map((f) => ({ id: f.id, title: f.title, entries: f.entries })),
+  });
 
   const js = `/**
  * Microsoft Icons for draw.io — auto-generated plugin. Do not edit by hand.
