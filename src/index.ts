@@ -143,6 +143,7 @@ function runBuild(rawArgs: string[]): number {
     const entries = buildEntries(icons, {
       collapseVariants: family.collapseVariants,
       preferTokens: family.preferTokens,
+      searchTags: `${family.name} Microsoft`,
     });
     totalEntries += entries.length;
 

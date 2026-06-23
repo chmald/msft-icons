@@ -8,6 +8,8 @@ export interface BuildOptions {
   collapseVariants?: boolean;
   /** Source-path substrings (priority order) deciding which variant wins. */
   preferTokens?: string[];
+  /** Extra search keywords added to every entry (e.g. the family name + "Microsoft"). */
+  searchTags?: string;
 }
 
 /** Lower score = preferred variant. */
@@ -77,12 +79,15 @@ export function buildEntries(icons: ProcessedIcon[], opts: BuildOptions = {}): L
 
   const entries: LibraryEntry[] = [];
   const titleCounts = new Map<string, number>();
+  const tags = opts.searchTags?.trim();
   for (const icon of sorted) {
     const base = icon.title || 'Untitled';
     const n = (titleCounts.get(base) ?? 0) + 1;
     titleCounts.set(base, n);
     const title = n > 1 ? `${base} (${n})` : base;
-    entries.push({ data: icon.dataUri, w: icon.w, h: icon.h, title, aspect: 'fixed' });
+    const entry: LibraryEntry = { data: icon.dataUri, w: icon.w, h: icon.h, title, aspect: 'fixed' };
+    if (tags) entry.tags = tags;
+    entries.push(entry);
   }
 
   return entries;
@@ -94,7 +99,7 @@ export function buildLibraryXml(entries: LibraryEntry[]): string {
 }
 
 /** Make a display name safe as a file name (filesystem- and URL-friendly). */
-function safeFileName(name: string): string {
+export function safeFileName(name: string): string {
   return name
     .replace(/&/g, 'and')
     .replace(/[<>:"/\\|?*]+/g, ' ')

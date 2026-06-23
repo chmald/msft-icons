@@ -3,6 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { loadConfig, DEFAULT_CONFIG_PATH } from './config.js';
 import { walkFiles, ensureDir } from './util/fsutil.js';
+import { safeFileName } from './library.js';
 import { info, error } from './util/log.js';
 import type { LibraryEntry } from './types.js';
 
@@ -10,7 +11,7 @@ interface PluginFamily {
   id: string;
   title: string;
   order: number;
-  entries: Pick<LibraryEntry, 'data' | 'w' | 'h' | 'title'>[];
+  entries: Pick<LibraryEntry, 'data' | 'w' | 'h' | 'title' | 'tags'>[];
 }
 
 function parseLibrary(file: string): LibraryEntry[] {
@@ -36,6 +37,7 @@ function main(): void {
   const meta = new Map<string, { name: string; order: number }>();
   config.families.forEach((f, i) => {
     meta.set(f.name, { name: f.name, order: i });
+    meta.set(safeFileName(f.name), { name: f.name, order: i });
     meta.set(f.id, { name: f.name, order: i });
   });
 
@@ -51,7 +53,13 @@ function main(): void {
       const base = path.basename(file, '.xml');
       const m = meta.get(base);
       const id = base.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      const entries = parseLibrary(file).map((e) => ({ data: e.data, w: e.w, h: e.h, title: e.title }));
+      const entries = parseLibrary(file).map((e) => ({
+        data: e.data,
+        w: e.w,
+        h: e.h,
+        title: e.title,
+        tags: e.tags,
+      }));
       return { id, title: m?.name ?? base, order: m?.order ?? 999, entries };
     })
     .filter((fam) => fam.entries.length > 0)
@@ -82,13 +90,13 @@ Draw.loadPlugin(function (ui) {
     'labelBackgroundColor=#ffffff;aspect=fixed;imageAspect=0;image=';
 
   DATA.families.forEach(function (fam) {
-    sb.addPalette('msft-' + fam.id, fam.title, false, function (content) {
-      fam.entries.forEach(function (e) {
-        content.appendChild(
-          sb.createVertexTemplate(STYLE + e.data, e.w, e.h, '', e.title, true, false)
-        );
-      });
+    // createVertexTemplateEntry registers each shape's tags in the search index,
+    // so the palette shapes are findable via "Search Shapes".
+    var fns = fam.entries.map(function (e) {
+      var tags = (e.tags || fam.title);
+      return sb.createVertexTemplateEntry(STYLE + e.data, e.w, e.h, '', e.title, true, false, tags);
     });
+    sb.addPaletteFunctions('msft-' + fam.id, fam.title, false, fns);
   });
 });
 `;

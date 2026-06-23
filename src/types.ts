@@ -98,4 +98,6 @@ export interface LibraryEntry {
   h: number;
   title: string;
   aspect: 'fixed';
+  /** Extra search keywords (draw.io indexes title + tags for "Search Shapes"). */
+  tags?: string;
 }
