@@ -22,7 +22,7 @@ function parseLibrary(file: string): LibraryEntry[] {
 /**
  * Build a self-contained draw.io plugin (`plugin/msft-icons.js`) that registers
  * every generated library as its own sidebar palette — so a single install
- * exposes ALL Microsoft icon families at once (draw.io Desktop / self-hosted).
+ * exposes ALL Microsoft icon families at once on self-hosted draw.io.
  */
 function main(): void {
   const args = process.argv.slice(2);
@@ -58,7 +58,8 @@ function main(): void {
  * Run "npm run plugin" to regenerate.
  *
  * Registers one sidebar palette per Microsoft product family (${families.length} families,
- * ${total} shapes). Install on draw.io Desktop (Extras > Plugins) or self-hosted draw.io.
+ * ${total} shapes). Plugins run on the draw.io web app and self-hosted draw.io
+ * (Docker image) only — NOT draw.io Desktop or Confluence/Jira. See README option C.
  *
  * The Microsoft icons remain Microsoft's property and are subject to Microsoft's
  * terms of use; see NOTICE.md.

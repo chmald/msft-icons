@@ -3,7 +3,8 @@
  * Run "npm run plugin" to regenerate.
  *
  * Registers one sidebar palette per Microsoft product family (6 families,
- * 1233 shapes). Install on draw.io Desktop (Extras > Plugins) or self-hosted draw.io.
+ * 1233 shapes). Plugins run on the draw.io web app and self-hosted draw.io
+ * (Docker image) only — NOT draw.io Desktop or Confluence/Jira. See README option C.
  *
  * The Microsoft icons remain Microsoft's property and are subject to Microsoft's
  * terms of use; see NOTICE.md.

@@ -99,20 +99,25 @@ https://app.diagrams.net/?clibs=Uhttps://raw.githubusercontent.com/chmald/msft-i
 
 A small **[URL builder](docs/index.html)** assembles these links for you.
 
-### C) draw.io plugin — load ALL families at once (Desktop / self-hosted)
+### C) draw.io plugin — load ALL families at once (self-hosted draw.io)
 
 The plugin [`plugin/msft-icons.js`](plugin/msft-icons.js) registers **one sidebar
-palette per family** (all 1233 shapes) in a single install — no per-file import, no
-long URL. It is self-contained (icons embedded, works offline).
+palette per family** (all 1233 shapes) in a single load — no per-file import, no long
+URL. It is self-contained (icons embedded, works offline).
 
-- **draw.io Desktop:** copy `plugin/msft-icons.js` into the app's plugins folder, or
-  use **Extras → Plugins → Add… → (path to the file)**, then restart.
-  - Plugins folder: Windows `%AppData%\draw.io\plugins`, macOS
-    `~/Library/Application Support/draw.io/plugins`, Linux `~/.config/draw.io/plugins`.
-- **Self-hosted draw.io:** serve the file and add it to the `PLUGINS` /
-  `?p=` allow-list, or load via `?p=<url-or-id>` per your deployment's plugin config.
-- **Public app.diagrams.net:** custom external plugins are **blocked for security** —
-  use options **A** or **B** there instead.
+> ⚠️ **Plugins are NOT supported in draw.io Desktop** (or the Confluence/Jira
+> integrations). Per the [official docs](https://www.drawio.com/docs/reference/plugins/),
+> plugins only run on the **web app** and **self-hosted draw.io (Docker image)**. On
+> the public **app.diagrams.net** the _Extras → Plugins_ dialog only lists Microsoft's
+> **built-in** plugins, so a custom plugin like this one is intended for
+> **self-hosted draw.io**.
+
+- **Self-hosted draw.io (Docker):** host `plugin/msft-icons.js` and register it as a
+  custom plugin in your deployment (e.g. the `PLUGINS`/preload configuration of the
+  [draw.io Docker image](https://www.drawio.com/docs/security/diagrams-docker-app/)),
+  then load it with `?p=` or the Plugins dialog.
+- **draw.io Desktop / public app / Confluence / Jira:** use options **A** (local
+  import) or **B** (`?clibs=` URL) instead — those work everywhere, including Desktop.
 
 Regenerate the plugin after rebuilding libraries with `npm run plugin`.
 
