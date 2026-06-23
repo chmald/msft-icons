@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { walkFiles } from './util/fsutil.js';
+import { xmlUnescapeContent } from './library.js';
 import { info, error } from './util/log.js';
 
 interface FileResult {
@@ -11,6 +12,7 @@ interface FileResult {
 }
 
 const DATA_PREFIX = 'data:image/svg+xml;base64,';
+const BAD_AMP = /&(?!(amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/;
 
 function validateFile(file: string): FileResult {
   const result: FileResult = { file, entries: 0, errors: [] };
@@ -22,9 +24,15 @@ function validateFile(file: string): FileResult {
     return result;
   }
 
+  // The envelope is parsed by draw.io as strict XML — a bare "&"/"<"/">"
+  // breaks loading and must be XML-escaped.
+  if (BAD_AMP.test(match[1]!) || /[<>]/.test(match[1]!)) {
+    result.errors.push('content is not XML-escaped (bare &, < or > in payload)');
+  }
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(match[1]!);
+    parsed = JSON.parse(xmlUnescapeContent(match[1]!));
   } catch (err) {
     result.errors.push(`payload is not valid JSON: ${(err as Error).message}`);
     return result;

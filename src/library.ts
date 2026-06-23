@@ -93,9 +93,31 @@ export function buildEntries(icons: ProcessedIcon[], opts: BuildOptions = {}): L
   return entries;
 }
 
-/** Wrap library entries in the draw.io `<mxlibrary>` envelope. */
+/**
+ * Escape the characters that are illegal in XML text content. The `<mxlibrary>`
+ * envelope is parsed by draw.io with a strict XML parser, so a raw `&`, `<` or
+ * `>` inside the JSON payload (e.g. a title/tag containing "&") would break
+ * loading. draw.io decodes these entities again via `getTextContent`.
+ */
+export function xmlEscapeContent(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** Inverse of {@link xmlEscapeContent} (mirrors draw.io's getTextContent). */
+export function xmlUnescapeContent(s: string): string {
+  return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+}
+
+/** Wrap library entries in the draw.io `<mxlibrary>` envelope (XML-escaped JSON). */
 export function buildLibraryXml(entries: LibraryEntry[]): string {
-  return `<mxlibrary>${JSON.stringify(entries)}</mxlibrary>`;
+  return `<mxlibrary>${xmlEscapeContent(JSON.stringify(entries))}</mxlibrary>`;
+}
+
+/** Parse a `<mxlibrary>` file's text back into entries (XML-unescaped JSON). */
+export function parseLibraryXml(text: string): LibraryEntry[] {
+  const match = text.trim().match(/^<mxlibrary>([\s\S]*)<\/mxlibrary>\s*$/);
+  if (!match) throw new Error('not a draw.io <mxlibrary> file');
+  return JSON.parse(xmlUnescapeContent(match[1]!)) as LibraryEntry[];
 }
 
 /** Make a display name safe as a file name (filesystem- and URL-friendly). */

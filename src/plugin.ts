@@ -3,7 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { loadConfig, DEFAULT_CONFIG_PATH } from './config.js';
 import { walkFiles, ensureDir } from './util/fsutil.js';
-import { safeFileName } from './library.js';
+import { safeFileName, parseLibraryXml } from './library.js';
 import { info, error } from './util/log.js';
 import type { LibraryEntry } from './types.js';
 
@@ -15,10 +15,7 @@ interface PluginFamily {
 }
 
 function parseLibrary(file: string): LibraryEntry[] {
-  const text = fs.readFileSync(file, 'utf8').trim();
-  const match = text.match(/^<mxlibrary>([\s\S]*)<\/mxlibrary>\s*$/);
-  if (!match) throw new Error(`not a draw.io library: ${file}`);
-  return JSON.parse(match[1]!) as LibraryEntry[];
+  return parseLibraryXml(fs.readFileSync(file, 'utf8'));
 }
 
 /**
