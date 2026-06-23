@@ -20,43 +20,53 @@ function preferenceScore(sourcePath: string, preferTokens: string[]): number {
 }
 
 /**
+ * Pick the icon to keep among duplicates. Preference order:
+ *   1. larger intrinsic artwork (sharper at any display size),
+ *   2. better `preferTokens` match (e.g. a colour variant),
+ *   3. larger raw byte size,
+ *   4. stable source-path order.
+ */
+function pickBetter(a: ProcessedIcon, b: ProcessedIcon, preferTokens: string[]): ProcessedIcon {
+  if (a.intrinsicArea !== b.intrinsicArea) return a.intrinsicArea > b.intrinsicArea ? a : b;
+  const pa = preferenceScore(a.sourcePath, preferTokens);
+  const pb = preferenceScore(b.sourcePath, preferTokens);
+  if (pa !== pb) return pa < pb ? a : b;
+  if (a.bytes !== b.bytes) return a.bytes > b.bytes ? a : b;
+  return a.sourcePath.localeCompare(b.sourcePath) <= 0 ? a : b;
+}
+
+function dedupeBy(
+  icons: ProcessedIcon[],
+  keyOf: (icon: ProcessedIcon) => string,
+  preferTokens: string[],
+): ProcessedIcon[] {
+  const best = new Map<string, ProcessedIcon>();
+  for (const icon of icons) {
+    const key = keyOf(icon);
+    const current = best.get(key);
+    best.set(key, current ? pickBetter(current, icon, preferTokens) : icon);
+  }
+  return [...best.values()];
+}
+
+/**
  * Build draw.io library entries from processed icons:
- *  - exact-duplicate artwork (same data URI) is dropped,
+ *  - **identical artwork is removed** (matched ignoring ids/declared size), keeping
+ *    the larger-resolution copy — see {@link pickBetter},
  *  - with `collapseVariants`, icons sharing a title collapse to one entry
- *    (the variant whose source path best matches `preferTokens`),
+ *    (again the larger/preferred variant wins),
  *  - otherwise distinct icons sharing a title are disambiguated " (2)", " (3)", …
  *  - output is sorted by title for deterministic, diff-friendly files.
  */
 export function buildEntries(icons: ProcessedIcon[], opts: BuildOptions = {}): LibraryEntry[] {
   const preferTokens = opts.preferTokens ?? [];
 
-  // Drop exact-duplicate artwork up front.
-  const seenData = new Set<string>();
-  const unique: ProcessedIcon[] = [];
-  for (const icon of icons) {
-    if (seenData.has(icon.dataUri)) continue;
-    seenData.add(icon.dataUri);
-    unique.push(icon);
-  }
+  // 1) Drop duplicate artwork (keep the larger copy).
+  let chosen = dedupeBy(icons, (i) => i.artKey, preferTokens);
 
-  let chosen: ProcessedIcon[];
+  // 2) Optionally collapse remaining same-title variants to one entry.
   if (opts.collapseVariants) {
-    // Keep one icon per title: the best-preferred variant.
-    const best = new Map<string, ProcessedIcon>();
-    for (const icon of unique) {
-      const key = (icon.title || 'Untitled').toLowerCase();
-      const current = best.get(key);
-      if (
-        !current ||
-        preferenceScore(icon.sourcePath, preferTokens) <
-          preferenceScore(current.sourcePath, preferTokens)
-      ) {
-        best.set(key, icon);
-      }
-    }
-    chosen = [...best.values()];
-  } else {
-    chosen = unique;
+    chosen = dedupeBy(chosen, (i) => (i.title || 'Untitled').toLowerCase(), preferTokens);
   }
 
   const sorted = chosen.sort((a, b) =>

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { XMLParser } from 'fast-xml-parser';
 import type { ProcessedIcon } from './types.js';
 import { deriveTitle } from './util/title.js';
@@ -75,6 +76,26 @@ export function toDataUri(svgText: string): string {
   return `data:image/svg+xml;base64,${base64}`;
 }
 
+/**
+ * A normalized hash of the artwork that ignores incidental differences —
+ * declared width/height and volatile element ids (e.g. Azure's random
+ * `uuid-…` ids / gradient references). Two copies of the same icon (even at
+ * different declared sizes or with different ids) produce the same key, while
+ * genuinely different artwork does not collide.
+ */
+export function artKey(svgText: string): string {
+  const normalized = svgText
+    .replace(/<\?xml[\s\S]*?\?>/g, '')
+    .replace(/<!DOCTYPE[\s\S]*?>/gi, '')
+    .replace(/uuid-[0-9a-fA-F-]+/g, 'ID')
+    .replace(/\sid="[^"]*"/g, '')
+    .replace(/\s(width|height)="[^"]*"/g, '')
+    .replace(/>\s+</g, '><')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return crypto.createHash('sha1').update(normalized).digest('hex');
+}
+
 /** Read and process a single SVG file into an icon ready for a library entry. */
 export function processSvg(
   absPath: string,
@@ -84,7 +105,8 @@ export function processSvg(
   dropTokens: string[],
 ): ProcessedIcon {
   const text = fs.readFileSync(absPath, 'utf8');
-  const size = targetSize(getSvgSize(text), sizePx);
+  const intrinsic = getSvgSize(text);
+  const size = targetSize(intrinsic, sizePx);
   const title = deriveTitle(path.basename(absPath), stripTokens, dropTokens);
   return {
     title,
@@ -92,5 +114,8 @@ export function processSvg(
     w: size.w,
     h: size.h,
     sourcePath,
+    artKey: artKey(text),
+    intrinsicArea: (intrinsic.w ?? 0) * (intrinsic.h ?? 0),
+    bytes: Buffer.byteLength(text, 'utf8'),
   };
 }

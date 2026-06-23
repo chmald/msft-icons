@@ -83,6 +83,12 @@ export interface ProcessedIcon {
   h: number;
   /** Source-relative path, used for variant preference when collapsing. */
   sourcePath: string;
+  /** Hash of the normalized artwork (ignores ids/size) — identical art = identical key. */
+  artKey: string;
+  /** Intrinsic area (w*h) before scaling; larger wins when deduping. */
+  intrinsicArea: number;
+  /** Raw SVG byte length; secondary "larger" tiebreak. */
+  bytes: number;
 }
 
 /** A draw.io mxlibrary entry (image-shape form). */
